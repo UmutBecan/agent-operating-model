@@ -7,6 +7,9 @@ Other projects solve parts of this problem. Their ideas shaped some templates he
 | l'Agence (agent shell with command gating) | Tiers for commands, fail-closed default, a tamper-evident decision ledger, CI guard | `templates/command-tiers.md`, `scripts/audit_chain.py` (own implementation) | Licence is MIT with a Commons Clause: not copied |
 | Decapod (governance runtime for coding agents) | Intent and scope before action, completion tied to verification output, protected paths, repo-native state | `templates/definition-of-done.md`, `templates/protected-paths.md` | Licence not stated on the page I read: ideas only |
 | Subagent collections (for example VoltAgent's list) | A large library of ready roles in a consistent file format | `templates/agents/` uses the same simple role-file idea, with boundaries and escalation | Collections give roles; they do not give an operating model |
+| Chock (governance-as-code for coding agents) | Rules compiled into git hooks, CI gates and native pre-execution hooks | `hooks/` shows the same idea in one small file | Not copied |
+| handrail (declarative guardrails, MIT) | Rule files in tiers across agent harnesses | The tier-file idea in `hooks/policy.json` | Different language; idea only |
+| TaG (spending, credentials, deployment guardrails) | Cross-project isolation | none | Business Source License: source-available, not reused |
 | General human-in-the-loop guidance | Why approval gates and separation of duties matter | `templates/approval-gates.md` turns the theory into a checklist | Mostly articles, not repositories |
 
 ## What is different here
