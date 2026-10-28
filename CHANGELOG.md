@@ -3,6 +3,9 @@
 Format follows Keep a Changelog; versions follow Semantic Versioning. Dates are Europe/Istanbul.
 
 ## [Unreleased]
+
+## [0.1.0] - 2026-10-28
+First tagged release: templates, scripts, a fail-closed PreToolUse hook, documents under CC BY 4.0 and software under MIT, 28 tests (Windows and Linux CI).
 ### Changed
 - Documents are now licensed under CC BY 4.0 (attribution required); software stays MIT in `LICENSE-CODE`. Added ATTRIBUTION.md. Earlier copies remain under MIT for those who received them.
 ### Added
@@ -11,9 +14,6 @@ Format follows Keep a Changelog; versions follow Semantic Versioning. Dates are 
 - CONTRIBUTING, SECURITY, FAQ and known limitations, CITATION.cff, issue and pull request templates.
 - Hook setup guide for Windows and Linux/macOS, translation plan, CI workflow draft.
 - Social preview image source (docs/assets/social-preview.png).
-
-## [0.1.0] - planned
-First tagged release: templates, scripts, hook, 18 tests.
 
 ## 2026-10-27
 ### Added
