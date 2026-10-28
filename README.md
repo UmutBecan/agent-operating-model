@@ -23,6 +23,25 @@ D2        6 days  TRIGGER  Example: switch the payment provider to live?
 
 Then edit `CLAUDE.md` (or your agent's instruction file): set the owner, the language, the gates that only you may pass. The register script prints how old every open decision is, so nothing you have not answered disappears.
 
+## What this is, and what it is not
+
+- It is a small set of files and habits for one person or a small team working with AI agents.
+- It is not a framework, a sandbox, or a way to make an agent safe without OS-level controls.
+- It is not tested on every agent; the hook targets Claude Code's PreToolUse hook.
+
+## How the pieces fit
+
+```mermaid
+flowchart LR
+  OWNER[You] --> COORD[Coordinator role]
+  COORD --> WORK[Specialist roles]
+  WORK -->|command| HOOK[PreToolUse hook: allow / ask / block]
+  HOOK --> RUN[Command runs]
+  WORK --> EVID[Evidence in the report]
+  COORD --> REG[Decision register: open items with age]
+  REG --> OWNER
+```
+
 ## What is inside
 
 | Path | What it is |
