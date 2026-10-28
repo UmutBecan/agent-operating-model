@@ -4,5 +4,7 @@ title: "agent-operating-model"
 authors:
   - family-names: Becan
     given-names: Umut
-license: MIT
+license:
+  - CC-BY-4.0
+  - MIT
 repository-code: "https://github.com/UmutBecan/agent-operating-model"

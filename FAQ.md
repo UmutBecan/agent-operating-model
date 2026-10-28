@@ -8,7 +8,7 @@
 
 **Is the hook a sandbox?** No. It is one layer that blocks, asks or allows by command tier and fails closed. Pair it with OS permissions.
 
-**Which license?** MIT for everything in this repository. No third-party code is included; related projects are described, not copied, in `docs/prior-art.md`.
+**Which license?** Documents and templates: CC BY 4.0 (attribution required, see ATTRIBUTION.md). Software in `scripts/`, `hooks/`, `tests/`: MIT (see LICENSE-CODE). No third-party code is included; related projects are described, not copied, in `docs/prior-art.md`.
 
 **Can I use this with agents other than Claude Code?** The templates are plain Markdown and work with any agent that reads an instruction file. The hook targets Claude Code's PreToolUse hook; other agents are untested.
 

@@ -20,3 +20,5 @@ Thanks for looking. This is a small, opinionated set of templates; changes that 
 ## Process
 
 Open an issue first for anything larger than a typo. Small pull requests, one change each. Be kind in review; this is a one-person project and replies may take a few days.
+
+By contributing you agree that your documents are licensed under CC BY 4.0 and your code under MIT, as described in ATTRIBUTION.md.

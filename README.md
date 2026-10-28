@@ -1,6 +1,6 @@
 # agent-operating-model
 
-![license](https://img.shields.io/badge/license-MIT-blue) ![python](https://img.shields.io/badge/python-3-informational) ![deps](https://img.shields.io/badge/dependencies-none-brightgreen)
+![license](https://img.shields.io/badge/docs-CC%20BY%204.0-blue) ![code license](https://img.shields.io/badge/code-MIT-blue) ![python](https://img.shields.io/badge/python-3-informational) ![deps](https://img.shields.io/badge/dependencies-none-brightgreen)
 
 > A copy-and-edit operating model for working with a team of AI agents: roles, cost modes, a decision register, evidence rules and approval gates. Built from one person's daily use, written the way an IT operations team would run it.
 
@@ -74,4 +74,5 @@ Failures you have hit, stack variants and hook tests are welcome. See [CONTRIBUT
 
 ## License
 
-MIT. See `LICENSE`.
+Documents: [CC BY 4.0](LICENSE). **Attribution is required**, see [ATTRIBUTION.md](ATTRIBUTION.md) for the wording.
+Software (`scripts/`, `hooks/`, `tests/`): [MIT](LICENSE-CODE).
