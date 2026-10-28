@@ -1,10 +1,11 @@
 {
-  "_comment": "Regular expressions matched against each command segment. Most restrictive tier wins; unlisted commands are tier 2.",
+  "_comment": "Regular expressions matched against each command segment. Most restrictive tier wins; unlisted commands are tier 2. protected_paths (ask) and blocked_paths (block) apply to Write/Edit tools; paths are normalised to forward slashes and matched case-insensitively.",
   "tier0": [
     "^(ls|pwd|cat|head|tail|wc|echo|date|which|whoami|grep|rg|find)(\\s|$)",
     "^git (status|diff|log|show|branch)(\\s|$)",
     "^(npm|npx) (test|run (test|lint|typecheck))(\\s|$)",
-    "^(pytest|python3? -m (pytest|unittest))(\\s|$)"
+    "^(pytest|python3? -m (pytest|unittest))(\\s|$)",
+    "^(dir|type|Get-ChildItem|Get-Location|Select-String)(\\s|$)"
   ],
   "tier1": [
     "^git (add|commit|checkout|switch|stash)(\\s|$)",
@@ -13,13 +14,33 @@
   "tier2": [
     "^git (push|reset|rebase|merge|clean)(\\s|$)",
     "^(npm|pip3?|apt|apt-get) (install|add|remove|uninstall)(\\s|$)",
-    "^(curl|wget|ssh|scp)(\\s|$)"
+    "^(curl|wget|ssh|scp)(\\s|$)",
+    "^(Invoke-WebRequest|Invoke-RestMethod|iwr|irm|Set-ExecutionPolicy|winget install)(\\s|$)",
+    "^reg (add|delete)(\\s|$)"
   ],
   "tier3": [
     "\\brm\\s+(-[a-zA-Z]*r[a-zA-Z]*f|-[a-zA-Z]*f[a-zA-Z]*r)\\b",
     "\\bchmod\\s+(-R\\s+)?0?777\\b",
     "^git push\\b.*(--force|-f)\\b.*\\b(main|master)\\b",
     "(^|\\s)(cat|less|more|head|tail)\\s+\\S*(\\.env|id_rsa|id_ed25519|\\.pem|secrets?\\.)\\S*",
-    "\\b(mkfs|dd\\s+if=|shutdown|reboot)\\b"
+    "\\b(mkfs|dd\\s+if=|shutdown|reboot)\\b",
+    "\\bRemove-Item\\b.*-Recurse.*-Force",
+    "\\bRemove-Item\\b.*-Force.*-Recurse",
+    "\\b(rd|rmdir)\\s+/s\\b",
+    "\\bdel\\s+/[sfq]\\b",
+    "\\bFormat-Volume\\b",
+    "(^|\\s)(type|Get-Content|gc)\\s+\\S*(\\.env|id_rsa|id_ed25519|\\.pem)\\S*"
+  ],
+  "protected_paths": [
+    "(^|/)\\.github/workflows/",
+    "(^|/)migrations?/",
+    "(^|/)CLAUDE\\.md$",
+    "(^|/)hooks/policy\\.json$"
+  ],
+  "blocked_paths": [
+    "(^|/)\\.env($|\\.)",
+    "(^|/)id_(rsa|ed25519)",
+    "\\.pem$",
+    "(^|/)\\.git/"
   ]
 }

@@ -17,7 +17,7 @@
 ## Known limitations
 
 - One-person system today; team use needs ownership and access rules not defined here.
-- The hook matches command patterns; it cannot understand every shell construct, so obfuscated commands may need extra policy lines. Add a test for each bypass you find.
+- The hook now also judges shell wrappers (`bash -c`), Windows commands and Write/Edit paths, and logs every decision when `AUDIT_LOG` is set (see `docs/hook-failure-modes.md`). It still matches patterns; it cannot understand every shell construct, so obfuscated commands may need extra policy lines. Add a test for each bypass you find.
 - Only English templates today. A Turkish translation is planned (see `docs/translation-plan.md`).
 - No Linux or macOS test run recorded yet; CI draft in `.github/workflows/tests.yml` would produce one once published.
 - Templates describe habits; they cannot make an agent follow them.
