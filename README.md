@@ -1,5 +1,7 @@
 # agent-operating-model
 
+![license](https://img.shields.io/badge/license-MIT-blue) ![python](https://img.shields.io/badge/python-3-informational) ![deps](https://img.shields.io/badge/dependencies-none-brightgreen)
+
 > A copy-and-edit operating model for working with a team of AI agents: roles, cost modes, a decision register, evidence rules and approval gates. Built from one person's daily use, written the way an IT operations team would run it.
 
 You do not need a framework. You need a few files the agents read every session and a few habits you keep. This repository gives you both.
@@ -10,6 +12,13 @@ You do not need a framework. You need a few files the agents read every session 
 git clone https://github.com/UmutBecan/agent-operating-model
 cp -r agent-operating-model/templates/* /path/to/your/project/
 python3 agent-operating-model/scripts/decision_age.py agent-operating-model/templates/decision-register.md
+```
+
+Output of the last command (the bundled example register):
+
+```text
+D1        8 days  OPEN     Example: apply the schema change to production?
+D2        6 days  TRIGGER  Example: switch the payment provider to live?
 ```
 
 Then edit `CLAUDE.md` (or your agent's instruction file): set the owner, the language, the gates that only you may pass. The register script prints how old every open decision is, so nothing you have not answered disappears.
@@ -37,6 +46,8 @@ Then edit `CLAUDE.md` (or your agent's instruction file): set the owner, the lan
 
 A written rule is not a control. `hooks/` shows how to turn the command tiers into a pre-execution hook that blocks by exit code and fails closed. Check the hook format against your Claude Code version, and remember that a hook is one layer: pair it with OS-level permissions. Hooks that crash can let an action proceed, which is why this one wraps every error as a block.
 
+See [FAQ.md](FAQ.md) for Windows/Linux notes and known limitations, [docs/hook-setup.md](docs/hook-setup.md) to wire the hook, and [CHANGELOG.md](CHANGELOG.md).
+
 ## Principles
 
 1. **Separate who, how and what is true.** Roles say who does the work. Procedures say how. Documents hold facts. Mixing them makes each worse.
@@ -56,6 +67,10 @@ One person or a small team who run several projects with AI agents and want the 
 - It is a one-person system today. Team use needs ownership and access rules this repository does not define.
 - Agents make mistakes. Most rules here exist because of a real failure (see `docs/failure-log.md`).
 - The value is the discipline, not the tooling.
+
+## Contributing
+
+Failures you have hit, stack variants and hook tests are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) and [SECURITY.md](SECURITY.md). If you use it in research or writing, [CITATION.cff](CITATION.cff) has a citation.
 
 ## License
 

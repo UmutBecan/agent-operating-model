@@ -1,0 +1,8 @@
+cff-version: 1.2.0
+message: "If you use this operating model, please cite it as below."
+title: "agent-operating-model"
+authors:
+  - family-names: Becan
+    given-names: Umut
+license: MIT
+repository-code: "https://github.com/UmutBecan/agent-operating-model"
