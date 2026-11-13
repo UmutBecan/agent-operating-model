@@ -1,4 +1,3 @@
-# DRAFT: file only, not published. Check action versions before use.
 name: tests
 on:
   push:
