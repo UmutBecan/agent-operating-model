@@ -6,6 +6,8 @@
 
 You do not need a framework. You need a few files the agents read every session and a few habits you keep. This repository gives you both.
 
+**[Block a risky Bash command in Claude Code](examples/claude-code-permissions/README.md)**: a copyable demo of allow, ask and block, with real hook output; the rules come from the [failure log](docs/failure-log.md).
+
 ## 60 seconds
 
 ```bash
@@ -57,6 +59,7 @@ flowchart LR
 | `scripts/decision_age.py` | Prints the age of each open decision. Python 3, no dependencies. |
 | `scripts/audit_chain.py` | A tamper-evident action log: each entry hashes the one before. Python 3, no dependencies. |
 | `hooks/pretooluse_tiers.py` + `policy.json` | A Claude Code PreToolUse hook that enforces the command tiers: allow, ask, or block (exit code 2), fail-closed. An example, not a sandbox. |
+| `examples/claude-code-permissions/` | Copyable `.claude/settings.json` demo: allow `git status`, ask on `git push`, block `rm -rf`. |
 | `tests/` | Tests for the scripts and the hook: `python3 -m unittest discover -s tests`. |
 | `docs/failure-log.md` | The failures that created each rule. |
 | `docs/prior-art.md` | Related projects, what this takes as an idea, what they do better. |
