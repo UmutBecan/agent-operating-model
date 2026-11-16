@@ -1,2 +1,11 @@
 __pycache__/
 *.pyc
+
+# Secrets and private material
+.env
+.env.*
+*.pem
+*.key
+id_*
+secrets/
+private/
