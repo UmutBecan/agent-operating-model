@@ -58,7 +58,8 @@ flowchart LR
 | `templates/agents/` | Three role files to start from: coordinator, skeptic, verifier. |
 | `scripts/decision_age.py` | Prints the age of each open decision. Python 3, no dependencies. |
 | `scripts/audit_chain.py` | A tamper-evident action log: each entry hashes the one before. Python 3, no dependencies. |
-| `hooks/pretooluse_tiers.py` + `policy.json` | A Claude Code PreToolUse hook that enforces the command tiers: allow, ask, or block (exit code 2), fail-closed. An example, not a sandbox. |
+| `hooks/pretooluse_tiers.py` + `policy/command-tiers.json` | A Claude Code PreToolUse hook that enforces the command tiers: allow, ask, or block (exit code 2), fail-closed. Every rule has an id and a rationale ([policy/README.md](policy/README.md)). An example, not a sandbox. |
+| `tests/corpus/bypass_cases.jsonl` + `tools/replay_corpus.py` | 185 evasion attempts with the minimum tier each must get, and a replay tool that exits 1 on any false allow. Results in [Bypass tests](examples/claude-code-permissions/README.md#bypass-tests). |
 | `examples/claude-code-permissions/` | Copyable `.claude/settings.json` demo: allow `git status`, ask on `git push`, block `rm -rf`. |
 | `tests/` | Tests for the scripts and the hook: `python3 -m unittest discover -s tests`. |
 | `docs/failure-log.md` | The failures that created each rule. |

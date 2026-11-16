@@ -1,0 +1,463 @@
+{
+  "schema": "command-tiers/1",
+  "version": "1.0.0",
+  "description": "Command tiers for the PreToolUse hook. Review changes like code: every rule has an id and a rationale, and every rule needs a test or a corpus case. Defense in depth, not a security boundary. See policy/README.md.",
+  "default_tier": 2,
+  "rules": [
+    {
+      "id": "T0-read-basic",
+      "tier": 0,
+      "pattern": "^(ls|pwd|cat|head|tail|wc|echo|date|which|whoami|grep|rg|find)(\\s|$)",
+      "rationale": "Read-only inspection commands. find is judged again for -delete and -exec; redirects are judged separately."
+    },
+    {
+      "id": "T0-git-read",
+      "tier": 0,
+      "pattern": "^git (status|diff|log|show|branch)(\\s|$)",
+      "rationale": "Git commands that only read repository state."
+    },
+    {
+      "id": "T0-js-tests",
+      "tier": 0,
+      "pattern": "^npm (test|run (test|lint|typecheck))(\\s|$)",
+      "rationale": "Test, lint and typecheck runners. (npx was removed from the 0.1.0 pattern: `npx test` downloads and runs a package named test; see T2-npx.)"
+    },
+    {
+      "id": "T0-python-tests",
+      "tier": 0,
+      "pattern": "^(pytest|python3? -m (pytest|unittest))(\\s|$)",
+      "rationale": "Python test runners."
+    },
+    {
+      "id": "T0-windows-read",
+      "tier": 0,
+      "pattern": "^(dir|type|Get-ChildItem|Get-Location|Select-String)(\\s|$)",
+      "rationale": "Windows read-only listing and search commands."
+    },
+    {
+      "id": "T1-git-local",
+      "tier": 1,
+      "pattern": "^git (add|commit|checkout|switch|stash)(\\s|$)",
+      "rationale": "Local, recoverable repository changes. Logged."
+    },
+    {
+      "id": "T1-fs-basic",
+      "tier": 1,
+      "pattern": "^(mkdir|touch|cp|mv)(\\s|$)",
+      "rationale": "Basic file creation and moves. Logged."
+    },
+    {
+      "id": "T2-git-history-and-remote",
+      "tier": 2,
+      "pattern": "^git (push|reset|rebase|merge|clean)(\\s|$)",
+      "rationale": "Changes shared history or discards work."
+    },
+    {
+      "id": "T2-package-install",
+      "tier": 2,
+      "pattern": "^(npm|pip3?|apt|apt-get) (install|add|remove|uninstall)(\\s|$)",
+      "rationale": "Installs or removes code on the machine (supply-chain risk)."
+    },
+    {
+      "id": "T2-network-tools",
+      "tier": 2,
+      "pattern": "^(curl|wget|ssh|scp)(\\s|$)",
+      "rationale": "Moves data or code over the network."
+    },
+    {
+      "id": "T2-windows-network-and-policy",
+      "tier": 2,
+      "pattern": "^(Invoke-WebRequest|Invoke-RestMethod|iwr|irm|Set-ExecutionPolicy|winget install)(\\s|$)",
+      "rationale": "Network fetches, execution-policy changes and installs on Windows."
+    },
+    {
+      "id": "T2-registry-edit",
+      "tier": 2,
+      "pattern": "^reg (add|delete)(\\s|$)",
+      "rationale": "Windows registry edits."
+    },
+    {
+      "id": "T2-decoders",
+      "tier": 2,
+      "pattern": "^(base64|xxd|uudecode|certutil|openssl enc)(\\s|$)",
+      "rationale": "A decoder usually exists to hide what a following shell will run; a human should see it."
+    },
+    {
+      "id": "T2-inline-interpreters",
+      "tier": 2,
+      "pattern": "^(python3?|perl|ruby|node|php|lua)\\s+(-c|-e|-r|-E)\\b",
+      "rationale": "Inline code in an interpreter cannot be judged by its command line."
+    },
+    {
+      "id": "T2-powershell-eval",
+      "tier": 2,
+      "pattern": "^(Invoke-Expression|iex|Invoke-Command|icm)(\\s|$)",
+      "rationale": "PowerShell evaluates a string as code."
+    },
+    {
+      "id": "T2-npx",
+      "tier": 2,
+      "pattern": "^npx(\\s|$)",
+      "rationale": "npx downloads and runs a package from the registry."
+    },
+    {
+      "id": "T2-git-branch-modify",
+      "tier": 2,
+      "pattern": "^git branch\\b.*\\s(-d|-D|--delete|-m|-M|--move|-f|--force|-c|-C|--copy)(\\s|$)",
+      "rationale": "git branch is read-only only when it lists; these flags delete, rename or overwrite branches."
+    },
+    {
+      "id": "T2-git-output-file",
+      "tier": 2,
+      "pattern": "^git (diff|log|show)\\b.*--output(=|\\s)",
+      "rationale": "Writes a file although the subcommand is otherwise read-only."
+    },
+    {
+      "id": "T2-rg-pre",
+      "tier": 2,
+      "pattern": "^rg\\b.*--pre(=|\\s)",
+      "rationale": "ripgrep --pre runs an arbitrary command on every file."
+    },
+    {
+      "id": "T2-find-write-flags",
+      "tier": 2,
+      "pattern": "^find\\b.*\\s-(fprint0?|fprintf|fls)(\\s|$)",
+      "rationale": "find writes a file with these actions."
+    },
+    {
+      "id": "T2-date-set",
+      "tier": 2,
+      "pattern": "^date\\b.*\\s(-s|--set)(=|\\s|$)",
+      "rationale": "Changes the system clock."
+    },
+    {
+      "id": "T2-delete-unlisted-flags",
+      "tier": 2,
+      "pattern": "^(rm|ri|del|erase|Remove-Item|rd|rmdir|shred)(\\s|$)",
+      "rationale": "Deletion without both recursive and force flags still needs a human."
+    },
+    {
+      "id": "T3-rm-recursive-force",
+      "tier": 3,
+      "pattern": "\\brm\\s+(-[a-zA-Z]*r[a-zA-Z]*f|-[a-zA-Z]*f[a-zA-Z]*r)\\b",
+      "rationale": "Recursive forced deletion. (C-recursive-delete covers split, long and PowerShell-style flags.)"
+    },
+    {
+      "id": "T3-chmod-777",
+      "tier": 3,
+      "pattern": "\\bchmod\\s+(-R\\s+)?0?777\\b",
+      "rationale": "World-writable permissions."
+    },
+    {
+      "id": "T3-force-push-protected",
+      "tier": 3,
+      "pattern": "^git push\\b.*(--force|-f)\\b.*\\b(main|master)\\b",
+      "rationale": "Force push to a protected branch. (C-force-push-protected covers other argument orders.)"
+    },
+    {
+      "id": "T3-read-secret-file",
+      "tier": 3,
+      "pattern": "(^|\\s)(cat|less|more|head|tail)\\s+\\S*secrets?\\.\\S*",
+      "rationale": "Reading a file named secret(s).* with a pager. Credential files such as .env and SSH keys are covered by T3-secret-file-any-argument."
+    },
+    {
+      "id": "T3-disk-and-power",
+      "tier": 3,
+      "pattern": "\\b(mkfs|dd\\s+if=|shutdown|reboot)",
+      "rationale": "Disk formatting, raw disk writes, shutdown. (Fixed: the 0.1.0 pattern ended in a word boundary and missed `dd if=`.)"
+    },
+    {
+      "id": "T3-ps-remove-recurse-force",
+      "tier": 3,
+      "pattern": "\\bRemove-Item\\b.*-Recurse.*-Force",
+      "rationale": "PowerShell recursive forced deletion, full parameter names."
+    },
+    {
+      "id": "T3-ps-remove-force-recurse",
+      "tier": 3,
+      "pattern": "\\bRemove-Item\\b.*-Force.*-Recurse",
+      "rationale": "Same, parameters in the other order."
+    },
+    {
+      "id": "T3-rd-s",
+      "tier": 3,
+      "pattern": "\\b(rd|rmdir)\\s+/s\\b",
+      "rationale": "cmd.exe recursive directory delete."
+    },
+    {
+      "id": "T3-del-flags",
+      "tier": 3,
+      "pattern": "\\bdel\\s+/[sfq]\\b",
+      "rationale": "cmd.exe forced or recursive delete."
+    },
+    {
+      "id": "T3-format-volume",
+      "tier": 3,
+      "pattern": "\\bFormat-Volume\\b",
+      "rationale": "Formats a disk volume."
+    },
+    {
+      "id": "T3-secret-file-any-argument",
+      "tier": 3,
+      "pattern": "(^|[\\s/\\\\\\\"'=<>])(\\.env(?!\\.(example|sample|template)(\\s|$))(\\.\\w+)?(?!\\w)|id_(rsa|ed25519|ecdsa|dsa)|[^\\s/\\\\]*\\.pem(?!\\w)|\\.aws/credentials|\\.netrc|\\.pgpass|\\.git-credentials|etc/shadow)",
+      "rationale": "Any command that names a credential file (.env, SSH keys, .pem, cloud and netrc credentials, /etc/shadow) as an argument or redirect target, not only cat. Template files such as .env.example are allowed."
+    }
+  ],
+  "path_rules": [
+    {
+      "id": "P-ci-workflows",
+      "kind": "protected",
+      "pattern": "(^|/)\\.github/workflows/",
+      "rationale": "CI definitions decide what runs with the repository's secrets."
+    },
+    {
+      "id": "P-migrations",
+      "kind": "protected",
+      "pattern": "(^|/)migrations?/",
+      "rationale": "Schema changes are hard to undo."
+    },
+    {
+      "id": "P-claude-md",
+      "kind": "protected",
+      "pattern": "(^|/)CLAUDE\\.md$",
+      "rationale": "Agent instructions: an agent must not rewrite its own rules."
+    },
+    {
+      "id": "P-legacy-policy",
+      "kind": "protected",
+      "pattern": "(^|/)hooks/policy\\.json$",
+      "rationale": "The legacy policy file is the gate itself."
+    },
+    {
+      "id": "P-command-tiers",
+      "kind": "protected",
+      "pattern": "(^|/)policy/command-tiers\\.json$",
+      "rationale": "The policy file is the gate itself."
+    },
+    {
+      "id": "B-dotenv",
+      "kind": "blocked",
+      "pattern": "(^|/)\\.env($|\\.)",
+      "rationale": "Secrets."
+    },
+    {
+      "id": "B-ssh-keys",
+      "kind": "blocked",
+      "pattern": "(^|/)id_(rsa|ed25519)",
+      "rationale": "Private keys."
+    },
+    {
+      "id": "B-pem",
+      "kind": "blocked",
+      "pattern": "\\.pem$",
+      "rationale": "Certificates and keys."
+    },
+    {
+      "id": "B-dot-git",
+      "kind": "blocked",
+      "pattern": "(^|/)\\.git/",
+      "rationale": "Repository internals (hooks run on the next git command)."
+    }
+  ],
+  "checks": [
+    {
+      "id": "C-recursive-delete",
+      "tier": 3,
+      "rationale": "rm, Remove-Item and aliases with recursive AND force flags in any form: split (-r -f), long (--recursive --force), capital -R, PowerShell parameters and abbreviations (-Rec -Fo)."
+    },
+    {
+      "id": "C-force-push-protected",
+      "tier": 3,
+      "rationale": "git push with any force form (-f, --force, --force-with-lease, +refspec) naming a protected branch, in any argument order and after git global options such as -C."
+    },
+    {
+      "id": "C-shell-uninspectable",
+      "tier": 2,
+      "rationale": "A shell started without a command string it can be judged by: bash script.sh, a shell reading from a pipe, PowerShell -EncodedCommand or -File."
+    },
+    {
+      "id": "C-eval",
+      "tier": 2,
+      "rationale": "eval builds code from strings; a human should see it. Its literal argument is also judged."
+    },
+    {
+      "id": "C-source",
+      "tier": 2,
+      "rationale": "source and . run a file or process substitution that cannot be inspected here."
+    },
+    {
+      "id": "C-opaque-command-name",
+      "tier": 2,
+      "rationale": "The command name is an unresolved variable, an ANSI-C quoted string or a brace expansion, so it cannot be known."
+    },
+    {
+      "id": "C-find-delete",
+      "tier": 2,
+      "rationale": "find -delete removes files although find is otherwise read-only. -exec and -ok are judged by the command they run."
+    },
+    {
+      "id": "C-substitution",
+      "tier": 2,
+      "rationale": "$(...), backticks and process substitution run code chosen at run time. Their bodies are judged too."
+    },
+    {
+      "id": "C-unparseable",
+      "tier": 2,
+      "rationale": "Unbalanced quotes: the text cannot be split reliably, so a human decides."
+    },
+    {
+      "id": "C-git-config-override",
+      "tier": 2,
+      "rationale": "git -c key=value (or --config-env) can set core.fsmonitor, core.pager, alias.* or credential.helper to a command, so even `git status` could run one."
+    },
+    {
+      "id": "C-depth-exceeded",
+      "tier": 2,
+      "rationale": "Wrappers nested more than four deep (bash -c inside bash -c ...)."
+    }
+  ],
+  "structure": {
+    "shells": {
+      "posix": [
+        "bash",
+        "sh",
+        "zsh",
+        "dash",
+        "ksh",
+        "fish",
+        "ash",
+        "csh",
+        "tcsh"
+      ],
+      "powershell": [
+        "pwsh",
+        "powershell"
+      ],
+      "cmd": [
+        "cmd"
+      ]
+    },
+    "prefix_commands": {
+      "sudo": {
+        "value_opts": [
+          "-u",
+          "-g",
+          "-h",
+          "-p",
+          "-C",
+          "-r",
+          "-t",
+          "-U",
+          "-D",
+          "-T"
+        ]
+      },
+      "doas": {
+        "value_opts": [
+          "-u",
+          "-C"
+        ]
+      },
+      "env": {
+        "value_opts": [
+          "-u",
+          "-C"
+        ]
+      },
+      "command": {},
+      "builtin": {},
+      "exec": {
+        "value_opts": [
+          "-a"
+        ]
+      },
+      "nohup": {},
+      "time": {},
+      "setsid": {},
+      "nice": {
+        "value_opts": [
+          "-n"
+        ]
+      },
+      "ionice": {
+        "value_opts": [
+          "-c",
+          "-n",
+          "-p",
+          "-t"
+        ]
+      },
+      "stdbuf": {
+        "value_opts": [
+          "-i",
+          "-o",
+          "-e"
+        ]
+      },
+      "timeout": {
+        "value_opts": [
+          "-k",
+          "-s"
+        ],
+        "positional": 1
+      },
+      "{": {},
+      "}": {},
+      "!": {},
+      "if": {},
+      "then": {},
+      "else": {},
+      "elif": {},
+      "fi": {},
+      "do": {},
+      "done": {},
+      "while": {},
+      "until": {}
+    },
+    "eval_commands": [
+      "eval"
+    ],
+    "source_commands": [
+      "source",
+      "."
+    ],
+    "recursive_delete_commands": [
+      "rm",
+      "ri",
+      "del",
+      "erase",
+      "remove-item",
+      "rmdir",
+      "rd"
+    ],
+    "git": {
+      "value_global_opts": [
+        "-C",
+        "-c",
+        "--git-dir",
+        "--work-tree",
+        "--namespace",
+        "--exec-path",
+        "--super-prefix",
+        "--config-env"
+      ],
+      "protected_branches": [
+        "main",
+        "master"
+      ]
+    },
+    "xargs_value_opts": [
+      "-I",
+      "-n",
+      "-P",
+      "-L",
+      "-s",
+      "-d",
+      "-E",
+      "-a",
+      "-J",
+      "-R",
+      "-S"
+    ]
+  }
+}
