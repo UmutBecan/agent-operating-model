@@ -7,6 +7,8 @@ Format follows Keep a Changelog; versions follow Semantic Versioning. Dates are 
 - `policy/command-tiers.json`: the tier rules as a versioned, reviewable policy (rule ids, rationale, strict loading, fail-closed on a missing or invalid file); `policy/README.md`. `hooks/policy.json` (0.1.0 format) still loads.
 - `tests/corpus/bypass_cases.jsonl` (185 evasion cases) and `tools/replay_corpus.py` (confusion summary, exit 1 on a false allow); CI runs it with `--strict`. On the same corpus the 0.1.0 hook had 22 false allows and 31 under-blocks; the hardened hook has 0 and 0. Not a security boundary.
 - Tests: `tests/test_policy_file.py`, `tests/test_bypass_corpus.py` (86 tests in total, was 34).
+### Fixed
+- `scripts/audit_chain.py`: `append` now holds an exclusive lock (fcntl, msvcrt on Windows) while it reads the last hash and writes the entry, so parallel hook processes no longer fork the chain (issue #1). A damaged tail is refused with a clear error instead of being chained onto; `verify` reports it as BROKEN instead of crashing. Tests: `tests/test_audit_chain_concurrency.py` (6 parallel writers, 120 entries; 3 runs OK on Linux).
 ### Changed
 - Hook: shell-aware tokenizer, nested wrapper unwrapping, simple variable resolution, `rm`/`Remove-Item` flag parsing, `find`/`xargs`/`eval`/`source` handling, git global options, redirect targets checked against protected and blocked paths, secret files caught for any command. Audit entries record the policy version.
 - Policy: `dd if=` is now matched (the 0.1.0 pattern could not match it); `npx` no longer tier 0 (`npx test` runs a downloaded package); `git branch -D`, `rg --pre`, `git diff --output`, `date -s` and similar tier-0 commands with side effects now ask.
