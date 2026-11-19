@@ -9,3 +9,6 @@ __pycache__/
 id_*
 secrets/
 private/
+
+# Audit log sidecar locks (created by scripts/audit_chain.py)
+*.jsonl.lock
