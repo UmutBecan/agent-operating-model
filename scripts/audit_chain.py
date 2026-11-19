@@ -7,11 +7,23 @@
 Changing, deleting or reordering any earlier entry breaks every hash after it, so `verify`
 reports the first bad line. This detects edits; it does not prevent them (keep the file
 where agents have append-only access, and copy it off-host). No dependencies.
+
+Concurrency: `append` and `verify` both hold an exclusive lock on a separate sidecar file
+(LOG + ".lock"). The log itself is never locked, so on Windows (where byte-range locks are
+mandatory) a reader cannot be blocked by, or block, a writer on the log file.
 """
 import hashlib
 import json
+import os
 import sys
+from contextlib import contextmanager
 from datetime import datetime, timezone
+
+try:  # POSIX
+    import fcntl
+except ImportError:  # Windows
+    fcntl = None
+    import msvcrt
 
 GENESIS = "0" * 64
 
@@ -21,33 +33,72 @@ def _hash(prev, body):
     return hashlib.sha256(prev.encode("ascii") + payload).hexdigest()
 
 
+@contextmanager
+def _log_lock(path):
+    """Exclusive, cross-process lock held on the sidecar file, never on the log."""
+    with open(path + ".lock", "a+b") as lk:
+        if fcntl is not None:
+            fcntl.flock(lk.fileno(), fcntl.LOCK_EX)
+            try:
+                yield
+            finally:
+                fcntl.flock(lk.fileno(), fcntl.LOCK_UN)
+        else:
+            lk.seek(0)
+            msvcrt.locking(lk.fileno(), msvcrt.LK_LOCK, 1)
+            try:
+                yield
+            finally:
+                lk.seek(0)
+                msvcrt.locking(lk.fileno(), msvcrt.LK_UNLCK, 1)
+
+
 def append(path, who, action, evidence="", now=None):
-    prev = GENESIS
-    try:
-        with open(path, encoding="utf-8") as f:
-            lines = [ln for ln in f.read().splitlines() if ln.strip()]
-        if lines:
-            prev = json.loads(lines[-1])["hash"]
-    except FileNotFoundError:
-        pass
-    body = {"time": (now or datetime.now(timezone.utc)).strftime("%Y-%m-%dT%H:%M:%SZ"), "who": who, "action": action, "evidence": evidence}
-    entry = dict(body, prev=prev, hash=_hash(prev, body))
-    with open(path, "a", encoding="utf-8") as f:
-        f.write(json.dumps(entry, sort_keys=True, ensure_ascii=False) + "\n")
+    body = {
+        "time": (now or datetime.now(timezone.utc)).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "who": who,
+        "action": action,
+        "evidence": evidence,
+    }
+    with _log_lock(path):
+        prev = GENESIS
+        if os.path.exists(path):
+            with open(path, encoding="utf-8") as f:
+                lines = [ln for ln in f.read().splitlines() if ln.strip()]
+            if lines:
+                try:
+                    prev = json.loads(lines[-1])["hash"]
+                except (ValueError, KeyError, TypeError) as exc:
+                    # Refuse to write: a new entry chained onto a damaged tail would hide the damage.
+                    raise ValueError(
+                        f"audit log tail is not a valid entry ({type(exc).__name__}); not appending"
+                    ) from exc
+        entry = dict(body, prev=prev, hash=_hash(prev, body))
+        with open(path, "a", encoding="utf-8") as f:
+            f.write(json.dumps(entry, sort_keys=True, ensure_ascii=False) + "\n")
+            f.flush()
+            os.fsync(f.fileno())
     return entry
 
 
 def verify(path):
+    """Return 0 if the chain is intact, otherwise the 1-based number of the first bad line."""
+    with _log_lock(path):
+        with open(path, encoding="utf-8") as f:
+            text = f.read()
     prev = GENESIS
-    with open(path, encoding="utf-8") as f:
-        for n, line in enumerate(f, 1):
-            if not line.strip():
-                continue
+    for n, line in enumerate(text.splitlines(), 1):
+        if not line.strip():
+            continue
+        try:
             entry = json.loads(line)
             body = {k: entry[k] for k in ("time", "who", "action", "evidence")}
-            if entry.get("prev") != prev or entry.get("hash") != _hash(prev, body):
-                return n
-            prev = entry["hash"]
+            ok = entry.get("prev") == prev and entry.get("hash") == _hash(prev, body)
+        except (ValueError, KeyError, TypeError):
+            ok = False
+        if not ok:
+            return n
+        prev = entry["hash"]
     return 0
 
 
